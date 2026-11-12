@@ -1,0 +1,18 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI Expense Tracker</title><link rel="stylesheet" href="{{ url_for('static',filename='style.css') }}"></head>
+<body><main class="wrap"><header><div><p class="eyebrow">PERSONAL FINANCE • SMART TRACKING</p><h1>AI Expense Tracker</h1><p class="muted">Understand where your money goes.</p></div><span class="tag">Gemini AI</span></header>
+<section class="summary"><div><span class="muted">Total recorded expenses</span><strong>₹{{ '%.2f'|format(total) }}</strong></div><div><span class="muted">Expense entries</span><strong>{{ expenses|length }}</strong></div></section>
+<section class="panel"><h2>Add an expense</h2><form method="post" action="/add">
+<label>Description</label><input name="title" placeholder="e.g. College lunch" required>
+<div class="grid"><div><label>Amount (₹)</label><input name="amount" type="number" min="0.01" step="0.01" placeholder="100" required></div>
+<div><label>Category</label><select name="category"><option>Food</option><option>Travel</option><option>Education</option><option>Shopping</option><option>Bills</option><option>Health</option><option>Other</option></select></div></div>
+<label>Date</label><input name="expense_date" type="date" required><button type="submit">Add expense</button></form></section>
+<section class="panel"><div class="row"><h2>Spending by category</h2></div>{% for c in categories %}<div class="category"><span>{{ c.category }}</span><strong>₹{{ '%.2f'|format(c.total) }}</strong></div>{% else %}<p class="muted">Your category summary will appear here.</p>{% endfor %}
+<button id="analyze" class="ai">✨ Generate AI spending insights</button><p id="status" class="muted"></p><pre id="insights"></pre></section>
+<section class="panel"><h2>Recent expenses</h2>{% for e in expenses %}<article class="expense"><div><strong>{{ e.title }}</strong><p>{{ e.category }} • {{ e.expense_date }}</p></div><div class="row"><strong>₹{{ '%.2f'|format(e.amount) }}</strong><form method="post" action="/delete/{{ e.id }}"><button class="danger">Delete</button></form></div></article>{% else %}<p class="muted">No expenses recorded yet.</p>{% endfor %}</section>
+<footer>Mini Project • Flask + SQLite + Gemini API</footer></main>
+<script>
+document.getElementById('analyze').addEventListener('click',async()=>{const b=document.getElementById('analyze'),s=document.getElementById('status'),o=document.getElementById('insights');b.disabled=true;s.textContent='Analyzing expenses...';o.textContent='';
+try{const r=await fetch('/ai-insights',{method:'POST'}),d=await r.json();if(!r.ok)throw new Error(d.error||'Request failed');o.textContent=d.insights;s.textContent='AI analysis complete.'}
+catch(e){s.textContent=e.message}finally{b.disabled=false}});
+</script></body></html>
